@@ -23,3 +23,10 @@ Run the program by providing the required video file parameter:<br>
 
 To see the available optional parameters, use the -h flag:<br>
 `python program.py -h`
+
+## TODO
+
+There are several issues currently.
+
+1. The trained model is rather weak and inaccurate.
+2. Should take speed into account when deciding if you were stopped at a red light
