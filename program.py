@@ -1,6 +1,7 @@
 import torch
 import cv2
 import json
+import os
 import time # Testing how long things take to run
 import sys # For quitting
 import argparse # For command line arguments
@@ -23,6 +24,7 @@ def load_model(model_name):
 
 def grab_image(file_name):
     """
+    ...
     """
     if file_name != '.mp4':
         # IDK TBH
@@ -60,7 +62,6 @@ def process_data():
     start = time.time()
     
     # Model
-    # model = load_model('runs/train/exp4/weights/best.pt')
     model = load_model('best.pt')
 
     # Load our video
@@ -70,6 +71,7 @@ def process_data():
     total_frames = capture.get(cv2.CAP_PROP_FRAME_COUNT)
     
     # Make sure there's actually a video
+    print(input_file, capture.get(cv2.CAP_PROP_FPS))
     if (total_frames == 0):
         print("No video provided or no frames found, quitting.");
         return False
@@ -78,14 +80,11 @@ def process_data():
     fps = capture.get(cv2.CAP_PROP_FPS)
     total_seconds = int(total_frames / fps)
     total_minutes = total_seconds / 60
-    print("Total frames: ", total_frames)
-    print("Total seconds: ", total_seconds)
 
     # Loop through the whole video, only check every ${3seconds}.
     # Hopefully this time is low enough to catch every stoplight
     frames_with_traffic_lights = []
     for second in range(0, total_seconds, FRAME_INTERVAL_CHECK_TIME):
-        
         frame = int(second * fps)
         capture.set(cv2.CAP_PROP_POS_FRAMES, frame) # Set the frame position to the frame we want to read
         ret, img = capture.read()
@@ -129,13 +128,8 @@ def process_data():
             break
         
     end = time.time()
-    print("TOTAL TIME: ", end - start)
     return frames_with_traffic_lights
 
-
-
-
-    
 if __name__ == "__main__":
 
     # Default values
@@ -147,7 +141,7 @@ if __name__ == "__main__":
 
     # Arguments handling
     parser = argparse.ArgumentParser(description='Reads in a video file and outputs the number of red and green lights passed')
-    parser.add_argument('-v, --video_file', type=str, required=True, help='Input video file')
+    parser.add_argument('-v', '--video_file', type=str, required=True, help='Input video file')
     parser.add_argument('-i', '--images', type=int, metavar='N', help='Number of images to display')
     parser.add_argument('-si', '--show_images', action='store_true', help='Toggles showing images in a new window')
     args, unknown = parser.parse_known_args()
@@ -171,7 +165,6 @@ if __name__ == "__main__":
         sys.exit()
         
     # Parse data and do whatever we want with each frame that has a traffic light
-    print("NUM OF FRAMES WITH A TRAFFIC LIGHT FOUND: ", len(frames_with_traffic_lights))
     if show_images:
         show_all_images(frames_with_traffic_lights, images_to_show)
     
@@ -184,22 +177,16 @@ if __name__ == "__main__":
     for idx in range(len(frames_with_traffic_lights)):
         for row in range(len(frames_with_traffic_lights[idx].pandas().xyxy[0]['name'])):
             light_color = frames_with_traffic_lights[idx].pandas().xyxy[0]['name'][row]
-            print("Light", row, ": ", light_color)
             if light_color == 'ga':
-                print("GA, adding to green")
                 green += 1
             elif light_color == 'gf':
-                print("GF, adding to green")
                 green += 1
             elif light_color == 'r':
-                print("RF, adding to red")
                 red += 1
             elif light_color == 'rf':
-                print("RF, adding to red")
                 red += 1
-            else:
-                print("NOTHING I GUESS")
-                # frames_with_traffic_lights[idx].show()
                 
-    print("GREEN: ", green, " RED: ", red)
+    print('\n\nFINISHED')
+    print("Green lights hit: ", green);
+    print("Red lights hit: ", red);
         
